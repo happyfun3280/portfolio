@@ -1,183 +1,278 @@
 
 import { WorkAbstract } from "./workAbstract.js";
+import { Timer, random, ColorRGB, ColorHSL } from "./tool.js";
 
 export default class openningWork extends WorkAbstract {
     constructor(ctx, canvasWidth, canvasHeight) {
         super(ctx, canvasWidth, canvasHeight);
 
-        this.intervalX = this.canvasWidth / 4;
-        this.intervalY = this.canvasHeight / 3;
+        this.outerRectCenterX = this.canvasWidth/2;
+        this.outerRectCenterY = this.canvasHeight/2;
 
-        this.red = Math.random() * 210 + 100;
-        this.green = Math.random() * 210 + 100;
-        this.blue = Math.random() * 210 + 100;
+        this.innerRectCenterX = this.canvasWidth/2;
+        this.innerRectCenterY = this.canvasHeight/2;
 
-        this.red_ = Math.random() * 255;
-        this.green_ = Math.random() * 255;
-        this.blue_ = Math.random() * 255;
+        this.outerRectWidth = 500;
+        this.outerRectHeight = 500;
+        
+        this.innerRectWidth = 200;
+        this.innerRectHeight = 200;
+
+        this.outerRect = {
+            p1: { x: this.outerRectCenterX - this.outerRectWidth/2, y: this.outerRectCenterY - this.outerRectHeight/2 },
+            p2: { x: this.outerRectCenterX + this.outerRectWidth/2, y: this.outerRectCenterY - this.outerRectHeight/2 },
+            p3: { x: this.outerRectCenterX + this.outerRectWidth/2, y: this.outerRectCenterY + this.outerRectHeight/2 },
+            p4: { x: this.outerRectCenterX - this.outerRectWidth/2, y: this.outerRectCenterY + this.outerRectHeight/2 }
+        }
+
+        this.innerRect = {
+            p1: { x: this.innerRectCenterX - this.innerRectWidth/2, y: this.innerRectCenterY - this.innerRectHeight/2 },
+            p2: { x: this.innerRectCenterX + this.innerRectWidth/2, y: this.innerRectCenterY - this.innerRectHeight/2 },
+            p3: { x: this.innerRectCenterX + this.innerRectWidth/2, y: this.innerRectCenterY + this.innerRectHeight/2 },
+            p4: { x: this.innerRectCenterX - this.innerRectWidth/2, y: this.innerRectCenterY + this.innerRectHeight/2 }
+        }
 
         this.door = {
-            y: this.canvasHeight,
-            vy: 0,
-            ay: 10
-        };
+            width: this.outerRectWidth,
+            height: this.outerRectHeight,
+            x: this.outerRect.p1.x,
+            originY: this.outerRect.p1.y,
+            y: this.outerRect.p1.y,
+            vy: 0
+        }
 
-        this.mouseY = 0;
-        this.mouseInterval = 0;
+        this.tempY = this.door.y;
+        this.prevY = 0;
+
+        this.hue = random(0, 360);
+        this.saturation = random(0, 100);
+
+        this.floorHue = random(0, 360);
+        this.floorSaturation = random(70, 100);
+
+        this.timer = new Timer(500);
+
         this.clicked = false;
-
-        this.time = 0;
-        this.timeLimit = 500;
     }
 
     init() {
-        
     }
 
     update() {
         super.update();
-        
-        if (!this.clicked) {
-            if (this.mouseInterval !== 0) {
-                this.door.y -= this.mouseInterval;
-                this.mouseInterval = 0;
-            }
-    
-            this.door.vy += this.door.ay;
-            this.door.y += this.door.vy;
-    
-            if (this.door.y >= this.canvasHeight) {
-                this.door.y = this.canvasHeight;
-                this.door.vy = -this.door.vy*0.5;
-    
-                this.time += this.deltaTime;
-                if (this.time > this.timeLimit) {
-                    this.intervalX = Math.random() * 0.1 * this.canvasWidth + this.canvasWidth * 0.3;
-                    this.intervalY = Math.random() * 0.1 * this.canvasHeight + this.canvasHeight * 0.3;
-                    this.red = Math.random() * 210 + 100;
-                    this.green = Math.random() * 210 + 100;
-                    this.blue = Math.random() * 210 + 100;
-    
-                    this.red_ = Math.random() * 255;
-                    this.green_ = Math.random() * 255;
-                    this.blue_ = Math.random() * 255;
-                    this.time = 0;
-                }
-            }
-        }
+        this.updateInnerRect();
+        this.updateDoor();
     }
 
     draw() {
-        let red = this.red;
-        let green = this.green;
-        let blue = this.blue;
-        let interval = 100;
-
-        this.ctx.beginPath();
-        this.ctx.fillStyle = `rgb(${red-interval+10}, ${green-interval+10}, ${blue-interval+10})`;
+        this.ctx.fillStyle = new ColorRGB(230, 230, 230);
         this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+        this.drawPlace();
+        this.drawDoor();
+
+        // this.drawOuterAndInnerRectLine();
+        // this.drawPlaceLine();
+
+    }
+
+    updateInnerRect() {
+        if (this.door.y < this.door.originY) return;
+
+        if (!this.timer.isTimeUp(this.deltaTime)) return;
+
+        this.hue = random(0, 255);
+        this.saturation = random(0, 100);
+        
+        this.floorHue = random(0, 255);
+        this.floorSaturation = random(0, 100);
+        
+        this.innerRectWidth = random(50, this.outerRectWidth/2);
+        this.innerRectHeight = this.innerRectWidth;
+
+        this.innerRectCenterX = random(this.outerRect.p1.x + this.innerRectWidth/2, this.outerRect.p2.x - this.innerRectWidth/2);
+        this.innerRectCenterY = random(this.outerRect.p1.y + this.innerRectHeight/2, this.outerRect.p4.y - this.innerRectHeight/2);
+
+
+        this.innerRect = {
+            p1: { x: this.innerRectCenterX - this.innerRectWidth/2, y: this.innerRectCenterY - this.innerRectHeight/2 },
+            p2: { x: this.innerRectCenterX + this.innerRectWidth/2, y: this.innerRectCenterY - this.innerRectHeight/2 },
+            p3: { x: this.innerRectCenterX + this.innerRectWidth/2, y: this.innerRectCenterY + this.innerRectHeight/2 },
+            p4: { x: this.innerRectCenterX - this.innerRectWidth/2, y: this.innerRectCenterY + this.innerRectHeight/2 }
+        }
+    }
+
+    updateDoor() {
+        if (this.clicked) return;
+
+        this.door.vy += 4;
+        this.door.y += this.door.vy;
+        if (this.door.y > this.door.originY) {
+            this.door.y = this.door.originY;
+            this.door.vy = -this.door.vy * 0.5;
+        }
+    }
+
+    drawOuterAndInnerRectLine() {
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.outerRect.p1.x, this.outerRect.p1.y);
+        this.ctx.lineTo(this.outerRect.p2.x, this.outerRect.p2.y);
+        this.ctx.lineTo(this.outerRect.p3.x, this.outerRect.p3.y);
+        this.ctx.lineTo(this.outerRect.p4.x, this.outerRect.p4.y);
         this.ctx.closePath();
+        this.ctx.strokeStyle = "black";
+        this.ctx.stroke();
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.innerRect.p1.x, this.innerRect.p1.y);
+        this.ctx.lineTo(this.innerRect.p2.x, this.innerRect.p2.y);
+        this.ctx.lineTo(this.innerRect.p3.x, this.innerRect.p3.y);
+        this.ctx.lineTo(this.innerRect.p4.x, this.innerRect.p4.y);
+        this.ctx.closePath();
+        this.ctx.strokeStyle = "black";
+        this.ctx.stroke();
+    }
+    
+    drawPlaceLine() {
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.outerRect.p1.x, this.outerRect.p1.y);
+        this.ctx.lineTo(this.innerRect.p1.x, this.innerRect.p1.y);
+        this.ctx.moveTo(this.outerRect.p2.x, this.outerRect.p2.y);
+        this.ctx.lineTo(this.innerRect.p2.x, this.innerRect.p2.y);
+        this.ctx.moveTo(this.outerRect.p3.x, this.outerRect.p3.y);
+        this.ctx.lineTo(this.innerRect.p3.x, this.innerRect.p3.y);
+        this.ctx.moveTo(this.outerRect.p4.x, this.outerRect.p4.y);
+        this.ctx.lineTo(this.innerRect.p4.x, this.innerRect.p4.y);
+        this.ctx.closePath();
+        this.ctx.strokeStyle = "black";
+        this.ctx.stroke();
+    }
+    
+    drawPlace() {
 
         //top
         this.ctx.beginPath();
-        let gradient = this.ctx.createLinearGradient(0, 0, 0, this.intervalY);
-        gradient.addColorStop(0, `rgb(${red-interval+40}, ${green-interval+40}, ${blue-interval+40})`);
-        gradient.addColorStop(1, `rgb(${red-interval}, ${green-interval}, ${blue-interval})`);
-        this.ctx.fillStyle = gradient;
-        this.ctx.moveTo(0, 0);
-        this.ctx.lineTo(this.canvasWidth, 0);
-        this.ctx.lineTo(this.canvasWidth - this.intervalX, this.intervalY);
-        this.ctx.lineTo(this.intervalX, this.intervalY);
-        this.ctx.fill();
+        this.ctx.moveTo(this.outerRect.p1.x, this.outerRect.p1.y);
+        this.ctx.lineTo(this.innerRect.p1.x, this.innerRect.p1.y);
+        this.ctx.lineTo(this.innerRect.p2.x, this.innerRect.p2.y);
+        this.ctx.lineTo(this.outerRect.p2.x, this.outerRect.p2.y);
         this.ctx.closePath();
-        
-        //left
-        this.ctx.beginPath();
-        gradient = this.ctx.createLinearGradient(0, 0, this.intervalX, 0);
-        gradient.addColorStop(0, `rgb(${red-interval+25}, ${green-interval+25}, ${blue-interval+25})`);
-        gradient.addColorStop(1, `rgb(${red-interval}, ${green-interval}, ${blue-interval})`);
+        let gradient = this.ctx.createLinearGradient(0, this.outerRect.p1.y, 0, this.innerRect.p1.y);
+        gradient.addColorStop(0, new ColorHSL(this.hue, this.saturation, 70).toString());
+        gradient.addColorStop(1, new ColorHSL(this.hue, this.saturation, 10).toString());
         this.ctx.fillStyle = gradient;
-        this.ctx.moveTo(0, 0);
-        this.ctx.lineTo(this.intervalX, this.intervalY);
-        this.ctx.lineTo(this.intervalX, this.canvasHeight - this.intervalY);
-        this.ctx.lineTo(0, this.canvasHeight);
         this.ctx.fill();
-        this.ctx.closePath();
-        
-        //bottom
-        this.ctx.beginPath();
-        gradient = this.ctx.createLinearGradient(0, this.canvasHeight, 0, this.canvasHeight - this.intervalY);
-        gradient.addColorStop(0, `rgb(${red}, ${green}, ${blue})`);
-        gradient.addColorStop(1, `rgb(${this.red_}, ${this.green_}, ${this.blue_})`);
-        this.ctx.fillStyle = gradient;
-        this.ctx.moveTo(0, this.canvasHeight);
-        this.ctx.lineTo(this.canvasWidth, this.canvasHeight);
-        this.ctx.lineTo(this.canvasWidth - this.intervalX, this.canvasHeight - this.intervalY);
-        this.ctx.lineTo(this.intervalX, this.canvasHeight - this.intervalY);
-        this.ctx.fill();
-        this.ctx.closePath();
+        this.ctx.strokeStyle = gradient;
+        this.ctx.stroke();
 
         //right
         this.ctx.beginPath();
-        gradient = this.ctx.createLinearGradient(this.canvasWidth, 0, this.canvasWidth - this.intervalX, 0);
-        gradient.addColorStop(0, `rgb(${red-interval+20}, ${green-interval+20}, ${blue-interval+20})`);
-        gradient.addColorStop(1, `rgb(${red-interval}, ${green-interval}, ${blue-interval})`);
+        this.ctx.moveTo(this.outerRect.p2.x, this.outerRect.p2.y);
+        this.ctx.lineTo(this.innerRect.p2.x, this.innerRect.p2.y);
+        this.ctx.lineTo(this.innerRect.p3.x, this.innerRect.p3.y);
+        this.ctx.lineTo(this.outerRect.p3.x, this.outerRect.p3.y);
+        this.ctx.closePath();
+        gradient = this.ctx.createLinearGradient(this.outerRect.p2.x, 0, this.innerRect.p2.x, 0);
+        gradient.addColorStop(0, new ColorHSL(this.hue, this.saturation, 70).toString());
+        gradient.addColorStop(1, new ColorHSL(this.hue, this.saturation, 10).toString());
         this.ctx.fillStyle = gradient;
-        this.ctx.moveTo(this.canvasWidth, 0);
-        this.ctx.lineTo(this.canvasWidth, this.canvasHeight);
-        this.ctx.lineTo(this.canvasWidth - this.intervalX, this.canvasHeight - this.intervalY);
-        this.ctx.lineTo(this.canvasWidth - this.intervalX, this.intervalY);
         this.ctx.fill();
-        this.ctx.closePath();
-
-
-        this.ctx.beginPath();
-        this.ctx.fillStyle = `rgb(214, 214, 214)`;
-        this.ctx.fillRect(0, 0, this.canvasWidth, this.door.y - this.mouseInterval);
-        this.ctx.closePath();
-
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = `rgb(0, 0, 0)`;
-        this.ctx.lineWidth = 40;
-        this.ctx.moveTo(0, this.door.y - this.mouseInterval);
-        this.ctx.lineTo(this.canvasWidth, this.door.y - this.mouseInterval);
+        this.ctx.strokeStyle = gradient;
         this.ctx.stroke();
-        this.ctx.closePath();
 
+        //left
         this.ctx.beginPath();
-        this.ctx.lineWidth = 10;
-        for (let i = 1; i < 10; i++) {
-            this.ctx.moveTo(0, this.door.y - this.mouseInterval - this.canvasHeight * (i/10));
-            this.ctx.lineTo(this.canvasWidth, this.door.y - this.mouseInterval - this.canvasHeight * (i/10));
-        }
-        this.ctx.stroke();
+        this.ctx.moveTo(this.outerRect.p4.x, this.outerRect.p4.y);
+        this.ctx.lineTo(this.innerRect.p4.x, this.innerRect.p4.y);
+        this.ctx.lineTo(this.innerRect.p1.x, this.innerRect.p1.y);
+        this.ctx.lineTo(this.outerRect.p1.x, this.outerRect.p1.y);
         this.ctx.closePath();
+        gradient = this.ctx.createLinearGradient(this.outerRect.p1.x, 0, this.innerRect.p1.x, 0);
+        gradient.addColorStop(0, new ColorHSL(this.hue, this.saturation, 70).toString());
+        gradient.addColorStop(1, new ColorHSL(this.hue, this.saturation, 10).toString());
+        this.ctx.fillStyle = gradient;
+        this.ctx.fill();
+        this.ctx.strokeStyle = gradient;
+        this.ctx.stroke();
 
-        for (let i = 1; i < 10; i++) {
-            this.ctx.beginPath();
-
-            let y = this.door.y - this.mouseInterval - this.canvasHeight * (i/10);
-            gradient = this.ctx.createLinearGradient(0, y + 3.5, 0, y + 20);
-            gradient.addColorStop(0, `rgb(173, 173, 173)`);
-            gradient.addColorStop(1, `rgb(214, 214, 214)`);
-            this.ctx.fillStyle = gradient;
-    
-            this.ctx.fillRect(0, y + 3.5, this.canvasWidth, 20);
-
-            this.ctx.closePath();
-        }
+        //center
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.innerRect.p1.x, this.innerRect.p1.y);
+        this.ctx.lineTo(this.innerRect.p2.x, this.innerRect.p2.y);
+        this.ctx.lineTo(this.innerRect.p3.x, this.innerRect.p3.y);
+        this.ctx.lineTo(this.innerRect.p4.x, this.innerRect.p4.y);
+        this.ctx.closePath();
+        this.ctx.fillStyle = new ColorHSL(this.hue, this.saturation, 12).toString();
+        this.ctx.fill();
+        this.ctx.strokeStyle = new ColorHSL(this.hue, this.saturation, 12).toString();
+        this.ctx.stroke();
+        
+        //bottom
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.outerRect.p3.x, this.outerRect.p3.y);
+        this.ctx.lineTo(this.innerRect.p3.x, this.innerRect.p3.y);
+        this.ctx.lineTo(this.innerRect.p4.x, this.innerRect.p4.y);
+        this.ctx.lineTo(this.outerRect.p4.x, this.outerRect.p4.y);
+        this.ctx.closePath();
+        gradient = this.ctx.createLinearGradient(0, this.outerRect.p4.y, 0, this.innerRect.p4.y);
+        gradient.addColorStop(0, new ColorHSL(this.hue, this.saturation, 70).toString());
+        gradient.addColorStop(1, new ColorHSL(this.floorHue, this.floorSaturation, 70).toString());
+        this.ctx.fillStyle = gradient;
+        this.ctx.fill();
+        this.ctx.strokeStyle = gradient;
+        this.ctx.stroke();
     }
-    
+
+    drawDoor() {
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.door.x, this.door.y);
+        this.ctx.lineTo(this.door.x + this.door.width, this.door.y);
+        this.ctx.lineTo(this.door.x + this.door.width, this.door.y + this.door.height);
+        this.ctx.lineTo(this.door.x, this.door.y + this.door.height);
+        this.ctx.closePath();
+
+        this.ctx.shadowBlur = 50;
+        this.ctx.shadowColor = "gray";
+
+        this.ctx.fillStyle = "white";
+        this.ctx.fill();
+        this.ctx.strokeStyle = "white";
+        this.ctx.stroke();
+
+        this.ctx.shadowBlur = 0;
+
+        this.ctx.beginPath();
+        for (let i = 1; i < 10; i++) {
+            this.ctx.moveTo(this.door.x, this.door.y + this.door.height * (i/10));
+            this.ctx.lineTo(this.door.x + this.door.width, this.door.y + this.door.height * (i/10));
+        
+        }
+        this.ctx.closePath();
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = 'rgb(200, 200, 200)';
+        this.ctx.stroke();
+
+        this.ctx.lineWidth = 1;
+    }
+
     mousedown(e) {
         this.clicked = true;
-        this.mouseY = e.clientY;
-        this.time = 0;
+        this.prevY = e.clientY;
+        this.tempY = this.door.y;
     }
 
     mousemove(e) {
-        if (this.clicked)
-            if (this.mouseY - e.clientY > 0)
-                this.mouseInterval = this.mouseY - e.clientY;
+        if (this.clicked) {
+            let delta = e.clientY - this.prevY;
+
+            this.door.y = this.tempY + delta;
+            if (this.door.y > this.door.originY) {
+                this.door.y = this.door.originY;
+            }
+            if (this.door.y < this.door.originY - this.door.height) {
+                this.door.y = this.door.originY - this.door.height;
+            }
+        }
     }
 
     mouseup(e) {

@@ -46,6 +46,26 @@ class App {
 
     setParent(element) {
         this.parent = element;
+
+        this.parent.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
+        this.parent.addEventListener('selectstart', function (e) {
+            e.preventDefault();
+        });
+        this.parent.addEventListener('dragstart', function (e) {
+            e.preventDefault();
+        });
+        this.parent.addEventListener('touchstart', function (e) {
+            if ((e.touches.length > 1) || e.targetTouches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+
+        this.parent.addEventListener('touchmove', function (e) {
+            e.preventDefault();
+        }, { passive: false });
     }
 
     setCallbacks(onWorkCallback, stopWorkCallback) {
@@ -63,7 +83,7 @@ class App {
 
         this.canvas = document.createElement('canvas');
         this.canvas.classList.add('app_canvas');
-        
+
         this.resize();
         window.addEventListener('resize', this.resize.bind(this));
 
@@ -140,6 +160,6 @@ function keyboardCallback(work) {
 }
 
 keyboard.makeKeyboard(main, [
-    { key: 'KeyQ', image: './images/buttonArt.png', callback: () => keyboardCallback(work.ButtonWork) },
-    { key: 'KeyW', image: './images/openningArt.png', callback: () => keyboardCallback(work.OpenningWork) }
+    { key: 'KeyQ', image: './images/buttonWork.png', callback: () => keyboardCallback(work.ButtonWork) },
+    { key: 'KeyW', image: './images/openningWork.png', callback: () => keyboardCallback(work.OpenningWork) }
 ]);

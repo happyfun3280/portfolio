@@ -29,9 +29,4 @@ export class WorkAbstract {
     mousemove() {}
     mousedown() {}
     mouseup() {}
-
-    // tool
-    random(min, max) {
-        return Math.random() * (max - min) + min;
-    }
 }
