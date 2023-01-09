@@ -12,7 +12,10 @@ class App {
     }
 
     constructor() {
+        this.parent = null;
+
         this.work = null;
+        this.releaseList = [];
 
         this.container = null;
 
@@ -76,6 +79,8 @@ class App {
     onWork(work) {
         if (this.work !== null) return;
 
+        this.releaseList = [];
+
         this.container = document.createElement('div');
         this.container.classList.add('app_container');
         this.parent.appendChild(this.container);
@@ -109,6 +114,10 @@ class App {
     stopWork() {
         if (this.stopWorkCallback) this.stopWorkCallback();
 
+        for (let i = 0; i < this.releaseList.length; i++) {
+            this.releaseList[i].e.removeEventListener(this.releaseList[i].t, this.releaseList[i].h);
+        }
+
         window.cancelAnimationFrame(this.handle);
         this.canvas.remove();
         this.exitButton.remove();
@@ -129,9 +138,18 @@ class App {
     init() {
         this.work.init();
 
-        window.addEventListener('mousemove', this.work.mousemove.bind(this.work));
-        window.addEventListener('mousedown', this.work.mousedown.bind(this.work));
-        window.addEventListener('mouseup', this.work.mouseup.bind(this.work));
+        function setEvent(element, type, callback, list) {
+            element.addEventListener(type, callback);
+            list.push({ e: element, t: type, h: callback });
+        }
+
+        setEvent(window, 'touchstart', this.work.touchstartCallback.bind(this.work), this.releaseList);
+        setEvent(window, 'touchmove', this.work.touchmoveCallback.bind(this.work), this.releaseList);
+        setEvent(window, 'touchend', this.work.touchendCallback.bind(this.work), this.releaseList);
+
+        setEvent(window, 'mousedown', this.work.mousedownCallback.bind(this.work), this.releaseList);
+        setEvent(window, 'mousemove', this.work.mousemoveCallback.bind(this.work), this.releaseList);
+        setEvent(window, 'mouseup', this.work.mouseupCallback.bind(this.work), this.releaseList);
     }
 
     run() {

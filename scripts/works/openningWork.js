@@ -6,17 +6,18 @@ export default class openningWork extends WorkAbstract {
     constructor(ctx, canvasWidth, canvasHeight) {
         super(ctx, canvasWidth, canvasHeight);
 
+
         this.outerRectCenterX = this.canvasWidth/2;
         this.outerRectCenterY = this.canvasHeight/2;
 
         this.innerRectCenterX = this.canvasWidth/2;
         this.innerRectCenterY = this.canvasHeight/2;
 
-        this.outerRectWidth = 500;
-        this.outerRectHeight = 500;
+        this.outerRectWidth = Math.min(this.canvasWidth*0.7, this.canvasHeight*0.7);
+        this.outerRectHeight = this.outerRectWidth;
         
-        this.innerRectWidth = 200;
-        this.innerRectHeight = 200;
+        this.innerRectWidth = this.outerRectWidth/2;
+        this.innerRectHeight = this.innerRectWidth;
 
         this.outerRect = {
             p1: { x: this.outerRectCenterX - this.outerRectWidth/2, y: this.outerRectCenterY - this.outerRectHeight/2 },
@@ -52,7 +53,7 @@ export default class openningWork extends WorkAbstract {
 
         this.timer = new Timer(500);
 
-        this.clicked = false;
+        this.touchId = null;
     }
 
     init() {
@@ -103,7 +104,7 @@ export default class openningWork extends WorkAbstract {
     }
 
     updateDoor() {
-        if (this.clicked) return;
+        if (this.touchId !== null) return;
 
         this.door.vy += 4;
         this.door.y += this.door.vy;
@@ -255,15 +256,17 @@ export default class openningWork extends WorkAbstract {
         this.ctx.lineWidth = 1;
     }
 
-    mousedown(e) {
-        this.clicked = true;
-        this.prevY = e.clientY;
-        this.tempY = this.door.y;
+    touchStarted(touch) {
+        if (this.touchId === null) {
+            this.touchId = touch.id;
+            this.prevY = touch.y;
+            this.tempY = this.door.y;
+        }
     }
 
-    mousemove(e) {
-        if (this.clicked) {
-            let delta = e.clientY - this.prevY;
+    touchMoved(touch) {
+        if (this.touchId === touch.id) {
+            let delta = touch.y - this.prevY;
 
             this.door.y = this.tempY + delta;
             if (this.door.y > this.door.originY) {
@@ -275,7 +278,9 @@ export default class openningWork extends WorkAbstract {
         }
     }
 
-    mouseup(e) {
-        this.clicked = false;
+    touchEnded(touch) {
+        if (this.touchId === touch.id) {
+            this.touchId = null;
+        }
     }
 };

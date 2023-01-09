@@ -4,11 +4,11 @@ export default class ButtonWork extends WorkAbstract {
     constructor(ctx, width, height) {
         super(ctx, width, height);
         this.btnList = [];
-        this.btnWidth = 140;
-        this.btnHeight = 80;
-        this.btnGap = 20;
+        this.btnWidth = width/10;
+        this.btnHeight = this.btnWidth*0.6;
+        this.btnGap = this.btnWidth*0.15;
         this.btnTimeLimit = 2000;
-        this.btnLength = 100;
+        this.btnLength = this.btnHeight;
 
         this.redColor = 250;
         this.greenColor = 100;
@@ -31,9 +31,10 @@ export default class ButtonWork extends WorkAbstract {
         this.drawButtons();    
     }
 
-    mousemove(e) {
-        let mouseX = e.clientX;
-        let mouseY = e.clientY;
+    touchMoved(touch) {
+
+        let mouseX = touch.x;
+        let mouseY = touch.y;
         
         for (let btn of this.btnList) {
             if (btn.pushed) continue;
