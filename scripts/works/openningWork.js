@@ -1,6 +1,6 @@
 
 import { WorkAbstract } from "./workAbstract.js";
-import { Timer, random, ColorRGB, ColorHSL } from "./tool.js";
+import { Timer, random, ColorRGB, ColorHSL } from "../utils.js";
 
 export default class openningWork extends WorkAbstract {
     constructor(ctx, canvasWidth, canvasHeight) {

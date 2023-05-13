@@ -3,8 +3,13 @@ import { WorkAbstract } from "./workAbstract.js";
 export default class ButtonWork extends WorkAbstract {
     constructor(ctx, width, height) {
         super(ctx, width, height);
+    }
+
+
+    init() {
         this.btnList = [];
-        this.btnWidth = width/10;
+
+        this.btnWidth = this.canvasWidth/(5*this.canvasWidth/this.canvasHeight);
         this.btnHeight = this.btnWidth*0.6;
         this.btnGap = this.btnWidth*0.15;
         this.btnTimeLimit = 2000;
@@ -13,10 +18,6 @@ export default class ButtonWork extends WorkAbstract {
         this.redColor = 250;
         this.greenColor = 100;
         this.blueColor = 250;
-    }
-
-
-    init() {
         this.initButtons();
     }
 

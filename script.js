@@ -1,6 +1,26 @@
 import * as keyboard from './scripts/keyboard.js';
 import * as work from './scripts/works/work.js';
 
+document.body.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+document.body.addEventListener('selectstart', function(e) {
+    e.preventDefault();
+});
+document.body.addEventListener('dragstart', function(e) {
+    e.preventDefault();
+});
+document.body.addEventListener('touchstart', function (e) {
+    if ((e.touches.length > 1) || e.targetTouches.length > 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+
+document.body.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+}, { passive: false });
+
 class App {
     static app = null;
 
@@ -181,5 +201,6 @@ keyboard.makeKeyboard(main, [
     { key: 'KeyQ', image: './images/buttonWork.png', callback: () => keyboardCallback(work.ButtonWork) },
     { key: 'KeyW', image: './images/openningWork.png', callback: () => keyboardCallback(work.OpenningWork) },
     { key: 'KeyE', image: './images/waveWork.png', callback: () => keyboardCallback(work.WaveWork) },
-    { key: 'KeyR', callback: () => keyboardCallback(work.sample) }
+    { key: 'KeyR', image: './images/lightAndShadowWork.png', callback: () => keyboardCallback(work.LightAndShadowWork) },
+    { key: 'KeyT', callback: () => keyboardCallback(work.sample) }
 ]);
