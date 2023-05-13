@@ -5,8 +5,9 @@ import { Timer, random, ColorRGB, ColorHSL } from "./tool.js";
 export default class openningWork extends WorkAbstract {
     constructor(ctx, canvasWidth, canvasHeight) {
         super(ctx, canvasWidth, canvasHeight);
+    }
 
-
+    init() {
         this.outerRectCenterX = this.canvasWidth/2;
         this.outerRectCenterY = this.canvasHeight/2;
 
@@ -56,9 +57,6 @@ export default class openningWork extends WorkAbstract {
         this.touchId = null;
     }
 
-    init() {
-    }
-
     update() {
         super.update();
         this.updateInnerRect();
@@ -80,7 +78,7 @@ export default class openningWork extends WorkAbstract {
     updateInnerRect() {
         if (this.door.y < this.door.originY) return;
 
-        if (!this.timer.isTimeUp(this.deltaTime)) return;
+        if (!this.timer.isExpiredTimer(this.deltaTime)) return;
 
         this.hue = random(0, 255);
         this.saturation = random(0, 100);

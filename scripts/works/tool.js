@@ -12,7 +12,7 @@ class Timer {
         this.tLimit = timelimit;
     }
 
-    isTimeUp(deltatime) {
+    isExpiredTimer(deltatime) {
         this.t += deltatime;
         if (this.t >= this.tLimit) {
             this.t = 0;

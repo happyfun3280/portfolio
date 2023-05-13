@@ -15,7 +15,7 @@ class App {
         this.parent = null;
 
         this.work = null;
-        this.releaseList = [];
+        this.events = [];
 
         this.container = null;
 
@@ -79,7 +79,7 @@ class App {
     onWork(work) {
         if (this.work !== null) return;
 
-        this.releaseList = [];
+        this.events = [];
 
         this.container = document.createElement('div');
         this.container.classList.add('app_container');
@@ -114,8 +114,8 @@ class App {
     stopWork() {
         if (this.stopWorkCallback) this.stopWorkCallback();
 
-        for (let i = 0; i < this.releaseList.length; i++) {
-            this.releaseList[i].e.removeEventListener(this.releaseList[i].t, this.releaseList[i].h);
+        for (let i = 0; i < this.events.length; i++) {
+            this.events[i].e.removeEventListener(this.events[i].t, this.events[i].h);
         }
 
         window.cancelAnimationFrame(this.handle);
@@ -143,13 +143,13 @@ class App {
             list.push({ e: element, t: type, h: callback });
         }
 
-        setEvent(window, 'touchstart', this.work.touchstartCallback.bind(this.work), this.releaseList);
-        setEvent(window, 'touchmove', this.work.touchmoveCallback.bind(this.work), this.releaseList);
-        setEvent(window, 'touchend', this.work.touchendCallback.bind(this.work), this.releaseList);
+        setEvent(window, 'touchstart', this.work.touchstartCallback.bind(this.work), this.events);
+        setEvent(window, 'touchmove', this.work.touchmoveCallback.bind(this.work), this.events);
+        setEvent(window, 'touchend', this.work.touchendCallback.bind(this.work), this.events);
 
-        setEvent(window, 'mousedown', this.work.mousedownCallback.bind(this.work), this.releaseList);
-        setEvent(window, 'mousemove', this.work.mousemoveCallback.bind(this.work), this.releaseList);
-        setEvent(window, 'mouseup', this.work.mouseupCallback.bind(this.work), this.releaseList);
+        setEvent(window, 'mousedown', this.work.mousedownCallback.bind(this.work), this.events);
+        setEvent(window, 'mousemove', this.work.mousemoveCallback.bind(this.work), this.events);
+        setEvent(window, 'mouseup', this.work.mouseupCallback.bind(this.work), this.events);
     }
 
     run() {
@@ -179,5 +179,7 @@ function keyboardCallback(work) {
 
 keyboard.makeKeyboard(main, [
     { key: 'KeyQ', image: './images/buttonWork.png', callback: () => keyboardCallback(work.ButtonWork) },
-    { key: 'KeyW', image: './images/openningWork.png', callback: () => keyboardCallback(work.OpenningWork) }
+    { key: 'KeyW', image: './images/openningWork.png', callback: () => keyboardCallback(work.OpenningWork) },
+    { key: 'KeyE', image: './images/waveWork.png', callback: () => keyboardCallback(work.WaveWork) },
+    { key: 'KeyR', callback: () => keyboardCallback(work.sample) }
 ]);

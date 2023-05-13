@@ -16,6 +16,8 @@ export class WorkAbstract {
     resize(width, height) {
         this.canvasWidth = width;
         this.canvasHeight = height; 
+
+        this.init();
     }
 
     
